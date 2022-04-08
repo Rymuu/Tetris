@@ -1,4 +1,4 @@
-package com.example.test;
+package com.example.tetris_game;
 
 import javafx.scene.shape.*;
 
