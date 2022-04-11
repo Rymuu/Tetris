@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -13,16 +14,21 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.media.MediaPlayer;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Tetris extends Application {
@@ -52,9 +58,11 @@ public class Tetris extends Application {
 
 
 
+
     private static Pane groupe = new Pane();
     private static Form object;
-    private static Scene scene = new Scene(groupe,XMAX+50,YMAX);
+
+    private static Scene scene = new Scene(groupe,XMAX+200,YMAX);
 
 
     private static int score = 0;
@@ -62,6 +70,9 @@ public class Tetris extends Application {
     private static boolean game = true;
     private  static Form nextObj = Controller.makeRect();
     private static int LinesNo = 0;
+    MediaPlayer mediaPlayerGame;
+    MediaPlayer mediaPlayerStart;
+
 
 
     public static void main(String[] args) {
@@ -78,8 +89,8 @@ public class Tetris extends Application {
 
         //Menu
         groupMenu = new Group();
-        groupMenu.setLayoutX(500);
-        groupMenu.setLayoutY(400);
+        groupMenu.setLayoutX(450);
+        groupMenu.setLayoutY(350);
         buttonStartMainMenu = new Button("Start new GAME!");
         buttonGoToHighScorePage = new Button("Go to highscore!");
         buttonReturnToMenu = new Button("Return to menu!");
@@ -89,11 +100,13 @@ public class Tetris extends Application {
 
 
 
+
         vboxMenu = new VBox(buttonStartMainMenu,buttonGoToHighScorePage,saisiePseudo);
+        vboxMenu.setAlignment(Pos.CENTER);
         groupMenu.getChildren().add(vboxMenu);
 
         sceneMenu = new Scene(groupMenu, 1000, 800, Color.BLACK);
-        Image gameTetris = new Image("https://cdn.pixabay.com/photo/2017/01/31/19/34/building-blocks-2026723_1280.png",false);
+        Image gameTetris = new Image("https://wallpapercave.com/wp/wp2675347.jpg",false);
         sceneMenu.setFill(new ImagePattern(gameTetris));
 
         stage.setScene(sceneMenu);
@@ -131,13 +144,16 @@ public class Tetris extends Application {
 
         sceneHighScorePage = new Scene(groupHighScorePage, 1000, 800, Color.BLACK);
         sceneHighScorePage.setFill(new ImagePattern(gameTetris));
+        scene.setFill(new ImagePattern(gameTetris));
 
 
 
 
         //Creating Score and Level text
         Line line = new Line(XMAX, 0, XMAX, YMAX);
+        line.setStroke(Color.VIOLET);
         Text scoretext = new Text("Score: ");
+        scoretext.setFill(Color.BLUE);
         scoretext.setStyle("-fx-font: 20 arial;");
         scoretext.setY(50);
         scoretext.setX(XMAX + 5);
@@ -146,7 +162,10 @@ public class Tetris extends Application {
         level.setY(100);
         level.setX(XMAX + 5);
         level.setFill(Color.GREEN);
-        groupe.getChildren().addAll(scoretext, line, level);
+        Image game_ = new Image("https://art.ngfiles.com/images/2402000/2402867_vulpsvulps_space.gif?f1647212328",false);
+        groupe.getChildren().addAll(new ImageView(game_),scoretext, line, level);
+        groupe.setStyle("-fx-background-color: black;");
+
 
 
         //Creating first block and the stage
@@ -157,6 +176,7 @@ public class Tetris extends Application {
         nextObj = Controller.makeRect();
         stage.setTitle("T E T R I S");
         stage.show();
+        musicStart();
 
         //Timer
         Timer fall = new Timer();
@@ -180,6 +200,7 @@ public class Tetris extends Application {
                             game = false;
                             addScoreToHighScore(pseudoPlayer, saisiePseudo,score,scores,tableHighScore );
                             stage.setScene(sceneHighScorePage);
+                            stopMusicGame();
 
                         }
                         // Exit
@@ -202,8 +223,11 @@ public class Tetris extends Application {
             @Override
             public void handle(ActionEvent event) {
                 //TODO init game scene
+
                 stage.setScene(scene);
                 fall.schedule(task, 0, 300);
+                stopMusicStart();
+                music();
 
 
             }
@@ -228,6 +252,36 @@ public class Tetris extends Application {
 
 
     }
+
+    public void music() {
+        String s = "tetris.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayerGame = new MediaPlayer(h);
+        mediaPlayerGame.play();
+
+    }
+
+    public void musicStart() {
+        String s = "tetris_start.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayerStart = new MediaPlayer(h);
+        mediaPlayerStart.play();
+
+    }
+
+    public void stopMusicGame() {
+
+        mediaPlayerGame.stop();
+
+
+    }
+    public void stopMusicStart() {
+
+        mediaPlayerStart.stop();
+
+
+    }
+
 
     private void moveOnKeyPress(Form form) {
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
